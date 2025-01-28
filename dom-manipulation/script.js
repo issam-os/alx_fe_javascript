@@ -49,6 +49,8 @@ function createAddQuoteForm() {
 // Function to populate categories dynamically in the dropdown
 function populateCategories() {
   const categoryFilter = document.getElementById('categoryFilter');
+  categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+
   const categories = [...new Set(quotes.map(quote => quote.category))];
 
   categories.forEach(category => {
@@ -134,9 +136,37 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
+// Function to fetch quotes from the server and sync with local storage
+function fetchQuotesFromServer() {
+  // Simulated server response (replace with real API calls)
+  const serverQuotes = [
+    { text: "Success is not final; failure is not fatal: It is the courage to continue that counts.", category: "Motivation" },
+    { text: "Happiness is not something ready-made. It comes from your own actions.", category: "Happiness" }
+  ];
+
+  // Merge server quotes with local quotes
+  const newQuotes = serverQuotes.filter(serverQuote =>
+    !quotes.some(localQuote => localQuote.text === serverQuote.text && localQuote.category === serverQuote.category)
+  );
+
+  if (newQuotes.length > 0) {
+    quotes.push(...newQuotes);
+    saveQuotes();
+    populateCategories();
+    alert(`Synced with server: ${newQuotes.length} new quotes added!`);
+  }
+}
+
+// Function to start periodic sync with the server
+function startPeriodicSync() {
+  fetchQuotesFromServer(); // Initial fetch
+  setInterval(fetchQuotesFromServer, 30000); // Fetch every 30 seconds
+}
+
 // Initialize the page with a random quote and create the add quote form
 showRandomQuote();
 createAddQuoteForm();
+startPeriodicSync();
 const lastSelectedCategory = localStorage.getItem('lastSelectedCategory');
 if (lastSelectedCategory) {
   document.getElementById('categoryFilter').value = lastSelectedCategory;
