@@ -137,23 +137,23 @@ function importFromJsonFile(event) {
 }
 
 // Function to fetch quotes from the server and sync with local storage
-function fetchQuotesFromServer() {
-  // Simulated server response (replace with real API calls)
-  const serverQuotes = [
-    { text: "Success is not final; failure is not fatal: It is the courage to continue that counts.", category: "Motivation" },
-    { text: "Happiness is not something ready-made. It comes from your own actions.", category: "Happiness" }
-  ];
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    const serverQuotes = await response.json();
 
-  // Merge server quotes with local quotes
-  const newQuotes = serverQuotes.filter(serverQuote =>
-    !quotes.some(localQuote => localQuote.text === serverQuote.text && localQuote.category === serverQuote.category)
-  );
+    const newQuotes = serverQuotes.filter(serverQuote =>
+      !quotes.some(localQuote => localQuote.text === serverQuote.title && localQuote.category === "Server")
+    ).map(serverQuote => ({ text: serverQuote.title, category: "Server" }));
 
-  if (newQuotes.length > 0) {
-    quotes.push(...newQuotes);
-    saveQuotes();
-    populateCategories();
-    alert(`Synced with server: ${newQuotes.length} new quotes added!`);
+    if (newQuotes.length > 0) {
+      quotes.push(...newQuotes);
+      saveQuotes();
+      populateCategories();
+      alert(`Synced with server: ${newQuotes.length} new quotes added!`);
+    }
+  } catch (error) {
+    console.error('Failed to fetch quotes from the server:', error);
   }
 }
 
